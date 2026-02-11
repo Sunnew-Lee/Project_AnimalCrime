@@ -13,6 +13,14 @@ class ANIMALCRIME_API UACSoundSetting : public UUserWidget
 	GENERATED_BODY()
 
 protected:
+	struct FInputDeviceInfo
+	{
+		FString DeviceId;
+		FString DeviceName;
+		bool bIsDefault;
+	};
+
+protected:
 	virtual void NativeConstruct() override;
 
 public:
@@ -24,6 +32,8 @@ protected:
 	void InitOutputDeviceComboBox();
 
 	UFUNCTION()
+	void OnInputDeviceChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
+	UFUNCTION()
 	void OnOutputDeviceChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
 
 	// delegate callback
@@ -32,6 +42,7 @@ protected:
 
 	UFUNCTION()
 	void OnDeviceSwapCompleted(const FSwapAudioOutputResult& SwapResult);
+
 protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UComboBoxString> InputDeviceComboBox;
@@ -39,12 +50,9 @@ protected:
 	TObjectPtr<UComboBoxString> OutputDeviceComboBox;
 
 	// 디바이스 캐시
+	TArray<FInputDeviceInfo> CachedInputDevices;
 	TArray<FAudioOutputDeviceInfo> CachedOutputDevices;
 
 	UPROPERTY()
 	FOnAudioOutputDevicesObtained OutputDeviceDelegate;
-
-	bool bIsRefreshingDevices = false;
-
-	bool bUpdatingOutputDeviceList = false;
 };

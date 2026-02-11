@@ -130,5 +130,8 @@ public:
 	//!< 오디오 디바이스 ID
 	UPROPERTY()
 	FString SelectedAudioOutputDeviceId;
+
+	UPROPERTY()
+	FString SelectedAudioInputDeviceId;
 };
 
