@@ -60,6 +60,7 @@ public:
 	//virtual void SettingsClose(const FInputActionValue& Value);
 	virtual void Jump() override;
 	virtual void SettingsClose();
+	virtual void SetSoundSetting();
 
 public:
 	/**

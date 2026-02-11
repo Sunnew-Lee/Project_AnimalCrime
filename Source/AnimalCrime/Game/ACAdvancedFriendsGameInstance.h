@@ -85,15 +85,15 @@ private:
 	void DoServerTravel();
 
 public:
- /**
-     @brief 맵 이동 중 대채 화면 표시
- **/
+	/**
+		@brief 맵 이동 중 대채 화면 표시
+	**/
 	UFUNCTION(BlueprintCallable)
 	void ShowTransitionScreen();
 
- /**
-	 @brief 대체 화면 숨기기
- **/
+	/**
+		@brief 대체 화면 숨기기
+	**/
 	UFUNCTION(BlueprintCallable)
 	void HideTransitionScreen();
 
@@ -125,5 +125,10 @@ protected:
 public:
 	UPROPERTY()
 	TObjectPtr<class UACFadeInScreen> TransitionScreen;
+
+public:
+	//!< 오디오 디바이스 ID
+	UPROPERTY()
+	FString SelectedAudioOutputDeviceId;
 };
 

@@ -30,6 +30,7 @@ enum class ESettingMode : uint8
 	Default			UMETA(DisplayName = "Sholder"),		// 기본 설정창
 	SteamFriendList	UMETA(DisplayName = "Settings"),	// 스팀 친구창
 	Interact		UMETA(DisplayName = "Interact"),    // 인터랙트
+	SoundSetting	UMETA(DisplayName = "SoundSetting"),// 사운드 설정
 };
 
 //플레이어 역할

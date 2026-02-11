@@ -8,9 +8,17 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInput/Public/InputMappingContext.h"
 #include "AnimalCrime.h"
+#include "UI/Sound/ACSoundSetting.h"
 
 AACPlayerControllerBase::AACPlayerControllerBase()
 {
+	//SoundSetting 로드
+	static ConstructorHelpers::FClassFinder<UACSoundSetting> SoundSettingRef(TEXT("/Game/Project/UI/Sound/WBP_SoundSetting.WBP_SoundSetting_C"));
+	if (SoundSettingRef.Succeeded())
+	{
+		SoundSettingWidgetClass = SoundSettingRef.Class;
+	}
+
 	// ===== 공통 입력 관련 로드 =====
 	static ConstructorHelpers::FObjectFinder<UInputMappingContext>
 		DefaultMappingContextRef(TEXT("/Game/Project/Input/IMC_Shoulder.IMC_Shoulder"));
@@ -81,6 +89,40 @@ AACPlayerControllerBase::AACPlayerControllerBase()
 	{
 		SettingsCloseAction = SettingsCloseActionRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction>
+		SoundSettingActionRef(TEXT("/Game/Project/Input/Actions/IA_SoundSetting.IA_SoundSetting"));
+	if (SoundSettingActionRef.Succeeded())
+	{
+		SoundSettingAction = SoundSettingActionRef.Object;
+	}
+}
+
+void AACPlayerControllerBase::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (IsLocalController() == false)
+	{
+		return;
+	}
+
+	//UI 연동
+
+	// 마우스 커서 숨김
+	bShowMouseCursor = false;
+
+	// 클릭 끔
+	bEnableClickEvents = false;
+	bEnableMouseOverEvents = false;
+
+	// 게임 입력만 받기
+	SetInputMode(FInputModeGameOnly());
+
+	// SteamFriendList 생성
+	SoundSettingWidget = CreateWidget<UACSoundSetting>(this, SoundSettingWidgetClass);
+	SoundSettingWidget->SetVisibility(ESlateVisibility::Hidden);
+	SoundSettingWidget->AddToViewport();
 }
 
 void AACPlayerControllerBase::SetupInputComponent()
@@ -135,6 +177,10 @@ void AACPlayerControllerBase::SetupInputComponent()
 	if (SettingsCloseAction)
 	{
 		EnhancedInputComponent->BindAction(SettingsCloseAction, ETriggerEvent::Started, this, &AACPlayerControllerBase::HandleSettingsClose);
+	}
+	if (SoundSettingAction)
+	{
+		EnhancedInputComponent->BindAction(SoundSettingAction, ETriggerEvent::Started, this, &AACPlayerControllerBase::HandleSoundSetting);
 	}
 	// 캐릭터 스킬 - Sprint
 	if (SprintAction)
@@ -294,6 +340,17 @@ void AACPlayerControllerBase::HandleSettingsClose(const FInputActionValue& Value
 	ControlledCharacter->SettingsClose();
 }
 
+void AACPlayerControllerBase::HandleSoundSetting(const FInputActionValue& Value)
+{
+	AACCharacter* ControlledCharacter = GetPawn<AACCharacter>();
+	if (ControlledCharacter == nullptr)
+	{
+		return;
+	}
+
+	ControlledCharacter->SetSoundSetting();
+}
+
 void AACPlayerControllerBase::ChangeInputMode(EInputMode NewMode)
 {
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer()))
@@ -312,6 +369,44 @@ void AACPlayerControllerBase::ChangeInputMode(EInputMode NewMode)
 		}
 	}
 }
+
+void AACPlayerControllerBase::SoundSettingToggle(bool bVisible)
+{
+	if (SoundSettingWidget == nullptr)
+	{
+		AC_LOG(LogSY, Warning, TEXT("SoundSettingWidget is nullptr"));
+		return;
+	}
+
+	if (bVisible == true)
+	{
+		AC_LOG(LogSY, Log, TEXT("open"));
+		//SoundSettingWidget->AddToViewport();
+		SoundSettingWidget->SetVisibility(ESlateVisibility::Visible);
+		SoundSettingWidget->RefreshAudioDevices();
+
+		// 마우스 커서 켜기
+		bShowMouseCursor = true;
+
+		// UI와 게임 입력 둘 다 받기
+		FInputModeGameAndUI InputMode;
+		InputMode.SetLockMouseToViewportBehavior(EMouseLockMode::DoNotLock);
+		SetInputMode(InputMode);
+	}
+	else
+	{
+		AC_LOG(LogSY, Log, TEXT("close"));
+		//SoundSettingWidget->RemoveFromParent();
+		SoundSettingWidget->SetVisibility(ESlateVisibility::Hidden);
+		// 마우스 커서 끄기
+		bShowMouseCursor = false;
+		bEnableClickEvents = false;
+		bEnableMouseOverEvents = false;
+		SetInputMode(FInputModeGameOnly());
+	}
+
+}
+
 
 bool AACPlayerControllerBase::CanUseSkill() const
 {

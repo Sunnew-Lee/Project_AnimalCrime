@@ -91,6 +91,9 @@ void AACLobbyCharacter::SettingsClose()
 		break;
 	case ESettingMode::Default:
 		break;
+	case ESettingMode::SoundSetting:
+		SetSoundSetting();
+		break;
 	case ESettingMode::SteamFriendList:
 		SetSteamFriendsList();
 		break;

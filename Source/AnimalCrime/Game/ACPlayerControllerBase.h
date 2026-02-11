@@ -12,6 +12,7 @@ class ANIMALCRIME_API AACPlayerControllerBase : public APlayerController
 public:
 	AACPlayerControllerBase();
 protected:
+	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 public:
 	/**
@@ -19,6 +20,14 @@ public:
 		@param NewMode - 새로운 입력 모드
 	**/
 	virtual void ChangeInputMode(EInputMode NewMode);
+
+public:
+	/**
+		@brief 소리 설정창 토글
+		@param bVisible - true면 켜기, false면 끄기
+	**/
+	void SoundSettingToggle(bool bVisible);
+
 	// ===== 공통 입력 처리 핸들러 =====
 protected:
 	virtual void HandleMove(const struct FInputActionValue& Value);
@@ -33,6 +42,7 @@ protected:
 	virtual void HandleSprintStart(const struct FInputActionValue& Value);
 	virtual void HandleSprintEnd(const struct FInputActionValue& Value);
 	virtual void HandleSettingsClose(const struct FInputActionValue& Value);
+	virtual void HandleSoundSetting(const struct FInputActionValue& Value);
 
 protected:
 	virtual bool CanUseSkill() const;
@@ -64,4 +74,13 @@ protected:
 	TObjectPtr<class UInputMappingContext> SettingsMappingContext;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<class UInputAction> SettingsCloseAction;
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
+	TObjectPtr<class UInputAction> SoundSettingAction;
+
+	// ===== UI =====
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "UI")
+	TSubclassOf<class UACSoundSetting> SoundSettingWidgetClass;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "UI")
+	TObjectPtr<class UACSoundSetting> SoundSettingWidget;
 };
