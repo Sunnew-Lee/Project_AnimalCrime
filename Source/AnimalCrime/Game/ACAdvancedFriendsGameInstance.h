@@ -97,6 +97,18 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void HideTransitionScreen();
 
+public:
+	/**
+		@brief 오디오 설정을 저장된 값으로 적용
+	**/
+	UFUNCTION()
+	void ApplySavedAudioSettings();
+
+private:
+	// 델리게이트 콜백 함수 (UFUNCTION으로 선언)
+	UFUNCTION()
+	void OnAudioOutputDeviceSwapCompleted(const FSwapAudioOutputResult& SwapResult);
+
 #pragma region Map Level 관련 맴버 변수 
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
@@ -126,6 +138,7 @@ public:
 	UPROPERTY()
 	TObjectPtr<class UACFadeInScreen> TransitionScreen;
 
+	//===== Audio Device Settings =====
 public:
 	//!< 오디오 디바이스 ID
 	UPROPERTY()
@@ -133,5 +146,9 @@ public:
 
 	UPROPERTY()
 	FString SelectedAudioInputDeviceId;
+
+private:
+	// 재적용 타이머 (AudioDevice 초기화 대기)
+	FTimerHandle AudioSettingsTimerHandle;
 };
 

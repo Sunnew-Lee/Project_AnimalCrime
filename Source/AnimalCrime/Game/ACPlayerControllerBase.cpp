@@ -68,7 +68,7 @@ AACPlayerControllerBase::AACPlayerControllerBase()
 	{
 		MeleeAction = MeleeActionRef.Object;
 	}
-	
+
 	static ConstructorHelpers::FObjectFinder<UInputAction> SprintActionRef(TEXT("/Game/Project/Input/Actions/IA_Sprint.IA_Sprint"));
 	if (SprintActionRef.Succeeded())
 	{
@@ -106,6 +106,15 @@ void AACPlayerControllerBase::BeginPlay()
 	{
 		return;
 	}
+
+	// 오디오 설정 적용
+	GetWorldTimerManager().SetTimer(
+		AudioSettingsTimer,
+		this,
+		&AACPlayerControllerBase::ApplyAudioSettings,
+		0.5f,
+		false
+	);
 
 	//UI 연동
 
@@ -189,6 +198,16 @@ void AACPlayerControllerBase::SetupInputComponent()
 		EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Completed, this, &AACPlayerControllerBase::HandleSprintEnd);
 		// EnhancedInputComponent->BindAction(SprintAction, ETriggerEvent::Canceled, this, &AACMainPlayerController::HandleSprintEnd);
 	}
+}
+
+void AACPlayerControllerBase::ApplyAudioSettings()
+{
+	UACAdvancedFriendsGameInstance* GI = GetGameInstance<UACAdvancedFriendsGameInstance>();
+	if (GI == nullptr)
+	{
+		return;
+	}
+	GI->ApplySavedAudioSettings();
 }
 
 void AACPlayerControllerBase::HandleMove(const FInputActionValue& Value)

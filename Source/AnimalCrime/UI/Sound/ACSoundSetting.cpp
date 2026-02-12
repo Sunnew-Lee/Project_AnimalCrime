@@ -37,6 +37,8 @@ void UACSoundSetting::RefreshAudioDevices()
 
 void UACSoundSetting::InitInputDeviceComboBox()
 {
+	//스팀 API에서 입력 디바이스 변경을 지원하지 않는 것으로 보임. 추후 수점
+
 	if (InputDeviceComboBox == nullptr)
 	{
 		return;

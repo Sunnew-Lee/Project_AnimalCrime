@@ -28,6 +28,13 @@ public:
 	**/
 	void SoundSettingToggle(bool bVisible);
 
+public:
+ /**
+	 @brief 오디오 설정 적용
+ **/
+	UFUNCTION()
+	void ApplyAudioSettings();
+
 	// ===== 공통 입력 처리 핸들러 =====
 protected:
 	virtual void HandleMove(const struct FInputActionValue& Value);
@@ -76,6 +83,10 @@ protected:
 	TObjectPtr<class UInputAction> SettingsCloseAction;
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Input")
 	TObjectPtr<class UInputAction> SoundSettingAction;
+
+	// ===== 오디오 설정 관련 =====
+protected:
+	FTimerHandle AudioSettingsTimer;
 
 	// ===== UI =====
 protected:
