@@ -109,6 +109,11 @@ private:
 	UFUNCTION()
 	void OnAudioOutputDeviceSwapCompleted(const FSwapAudioOutputResult& SwapResult);
 
+public:
+	// 플레이어별 마이크 볼륨 설정 및 조회 함수
+	void SetPlayerMicVolume(const FString& PlayerName, float Volume);
+	float GetPlayerMicVolume(const FString& PlayerName) const;
+
 #pragma region Map Level 관련 맴버 변수 
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
@@ -150,5 +155,11 @@ public:
 private:
 	// 재적용 타이머 (AudioDevice 초기화 대기)
 	FTimerHandle AudioSettingsTimerHandle;
+
+private:
+	// 플레이어 UniqueNetId 기준으로 볼륨 저장
+	UPROPERTY()
+	TMap<FString, float> PlayerMicVolumeMap;
+
 };
 

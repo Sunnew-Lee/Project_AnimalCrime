@@ -2,6 +2,10 @@
 #include "Components/ComboBoxString.h"
 #include "Engine/Engine.h"
 #include "Game/ACAdvancedFriendsGameInstance.h"
+#include "ACPlayerVoiceControlEntryData.h"
+#include "Components/ListView.h"
+#include "GameFramework/GameStateBase.h"
+#include "Game/ACPlayerState.h"
 #include "AnimalCrime.h"
 
 #if PLATFORM_WINDOWS
@@ -31,8 +35,12 @@ void UACSoundSetting::RefreshAudioDevices()
 {
 	UE_LOG(LogSY, Log, TEXT("[SoundSetting] RefreshAudioDevices"));
 
+	// 디바이스 목록 새로고침
 	InitInputDeviceComboBox();
 	InitOutputDeviceComboBox();
+
+	//플레이어별 음성 세팅 가져오기
+	UpdatePlayerVoiceList();
 }
 
 void UACSoundSetting::InitInputDeviceComboBox()
@@ -188,6 +196,47 @@ void UACSoundSetting::InitOutputDeviceComboBox()
 	);
 
 	UE_LOG(LogSY, Log, TEXT("출력 디바이스 초기화 완료"));
+}
+
+void UACSoundSetting::UpdatePlayerVoiceList()
+{
+	if (PlayerVoiceList == nullptr)
+	{
+		return;
+	}
+	// 기존 리스트 비우기
+	PlayerVoiceList->ClearListItems();
+
+	AGameStateBase* GameState = GetWorld()->GetGameState();
+	if (GameState == nullptr)
+	{
+		return;
+	}
+
+	for (APlayerState* PlayerState : GameState->PlayerArray)
+	{
+		if (PlayerState == nullptr || PlayerState == GetOwningPlayerState())
+		{
+			continue;
+		}
+
+		AACPlayerState* PS = Cast<AACPlayerState>(PlayerState);
+		if(PS == nullptr)
+		{
+			continue;
+		}
+
+		UACPlayerVoiceControlEntryData* Item = NewObject<UACPlayerVoiceControlEntryData>(this);
+		if (Item == nullptr)
+		{
+			continue;
+		}
+
+		// EntryData에 플레이어 정보 저장
+		Item->PlayerState = PS;
+
+		PlayerVoiceList->AddItem(Item);
+	}
 }
 
 void UACSoundSetting::OnInputDeviceChanged(FString SelectedItem, ESelectInfo::Type SelectionType)

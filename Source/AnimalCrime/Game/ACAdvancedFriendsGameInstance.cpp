@@ -335,3 +335,17 @@ void UACAdvancedFriendsGameInstance::OnAudioOutputDeviceSwapCompleted(const FSwa
 		SelectedAudioOutputDeviceId.Empty();
 	}
 }
+
+void UACAdvancedFriendsGameInstance::SetPlayerMicVolume(const FString& PlayerName, float Volume)
+{
+	PlayerMicVolumeMap.Add(PlayerName, FMath::Clamp(Volume, 0.f, 1.f));
+}
+
+float UACAdvancedFriendsGameInstance::GetPlayerMicVolume(const FString& PlayerName) const
+{
+	if (const float* Volume = PlayerMicVolumeMap.Find(PlayerName))
+	{
+		return *Volume;
+	}
+	return 0.5f; // 기본값
+}

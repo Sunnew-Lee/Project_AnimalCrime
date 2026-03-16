@@ -14,4 +14,24 @@ class ANIMALCRIME_API UACPlayerVoiceControlEntry : public UUserWidget, public IU
 
 public:
 	virtual void NativeOnListItemObjectSet(UObject* ListItemObject) override;
+
+	void UpdatePlayer(class AACPlayerState* InPlayerState);
+
+	UFUNCTION()
+	void OnSliderValueChanged(float Value);
+
+	UFUNCTION()
+	void OnSliderCaptureEnd();
+
+protected:
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UTextBlock> PlayerNameText;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UImage> PlayerAvatarImage;
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class USlider> PlayerSlider;
+
+protected:
+	UPROPERTY()
+	TObjectPtr<class UACPlayerVoiceControlEntryData> ItemData;
 };

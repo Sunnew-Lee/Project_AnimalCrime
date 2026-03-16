@@ -5,8 +5,6 @@
 #include "AudioMixerBlueprintLibrary.h"
 #include "ACSoundSetting.generated.h"
 
-class UComboBoxString;
-
 UCLASS()
 class ANIMALCRIME_API UACSoundSetting : public UUserWidget
 {
@@ -24,12 +22,19 @@ protected:
 	virtual void NativeConstruct() override;
 
 public:
+ /**
+     @brief 오디오 UI 업데이트 함수
+ **/
 	UFUNCTION()
 	void RefreshAudioDevices();
 
 protected:
+	// 입출력 디바이스 콤보박스 초기화 함수
 	void InitInputDeviceComboBox();
 	void InitOutputDeviceComboBox();
+
+	// 플레이어별 음성 세팅 업데이트 함수
+	void UpdatePlayerVoiceList();
 
 	UFUNCTION()
 	void OnInputDeviceChanged(FString SelectedItem, ESelectInfo::Type SelectionType);
@@ -45,9 +50,9 @@ protected:
 
 protected:
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UComboBoxString> InputDeviceComboBox;
+	TObjectPtr<class UComboBoxString> InputDeviceComboBox;
 	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UComboBoxString> OutputDeviceComboBox;
+	TObjectPtr<class UComboBoxString> OutputDeviceComboBox;
 
 	// 디바이스 캐시
 	TArray<FInputDeviceInfo> CachedInputDevices;
@@ -55,4 +60,7 @@ protected:
 
 	UPROPERTY()
 	FOnAudioOutputDevicesObtained OutputDeviceDelegate;
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<class UListView> PlayerVoiceList;
 };
