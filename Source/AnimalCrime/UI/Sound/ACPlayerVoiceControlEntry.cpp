@@ -3,6 +3,7 @@
 #include "Components/TextBlock.h"
 #include "Components/Image.h"
 #include "Components/Slider.h"
+#include "Components/CheckBox.h"
 #include "AdvancedSteamFriendsLibrary.h"
 #include "AdvancedFriendsLibrary.h"
 #include "Game/ACAdvancedFriendsGameInstance.h"
@@ -29,6 +30,12 @@ void UACPlayerVoiceControlEntry::NativeOnListItemObjectSet(UObject* ListItemObje
 	}
 	PlayerSlider->OnValueChanged.AddDynamic(this, &UACPlayerVoiceControlEntry::OnSliderValueChanged);
 	PlayerSlider->OnMouseCaptureEnd.AddDynamic(this, &UACPlayerVoiceControlEntry::OnSliderCaptureEnd);
+
+	if (MuteCheckBox == nullptr)
+	{
+		return;
+	}
+	MuteCheckBox->OnCheckStateChanged.AddDynamic(this, &UACPlayerVoiceControlEntry::OnMuteCheckBoxChanged);
 }
 
 void UACPlayerVoiceControlEntry::UpdatePlayer(AACPlayerState* InPlayerState)
@@ -83,25 +90,53 @@ void UACPlayerVoiceControlEntry::UpdatePlayer(AACPlayerState* InPlayerState)
 			return;
 		}
 
-		PlayerSlider->SetValue(GI->GetPlayerMicVolume(InPlayerState->GetPlayerName()));
+		float InitialVolume = GI->GetPlayerMicVolume(InPlayerState->GetPlayerName());
+		PlayerSlider->SetValue(InitialVolume);
+
+		if (VolumeText != nullptr)
+		{
+			VolumeText->SetText(FText::FromString(FString::FromInt((int32)(InitialVolume * 100.0f))));
+		}
 	}
 	else
 	{
 		UE_LOG(LogSY, Warning, TEXT("PlayerSlider is nullptr"));
 	}
 
+	if (MuteCheckBox != nullptr)
+	{
+		UACAdvancedFriendsGameInstance* GI = GetWorld()->GetGameInstance<UACAdvancedFriendsGameInstance>();
+		if (GI == nullptr)
+		{
+			UE_LOG(LogSY, Warning, TEXT("GameInstance is nullptr"));
+			return;
+		}
+		bool bIsMuted = GI->GetPlayerMicMute(InPlayerState->GetPlayerName());
+		MuteCheckBox->SetIsChecked(bIsMuted);
+	}
+	else
+	{
+		UE_LOG(LogSY, Warning, TEXT("MuteCheckBox is nullptr"));
+	}
 }
 
 void UACPlayerVoiceControlEntry::OnSliderValueChanged(float Value)
 {
 	AACCharacter* Character = Cast<AACCharacter>(ItemData->PlayerState->GetPawn());
-	if(Character == nullptr)
+	if (Character == nullptr)
 	{
 		UE_LOG(LogSY, Warning, TEXT("Character is nullptr"));
 		return;
 	}
 
 	Character->VOIPTalker->SetVOIPVolume(Value);
+
+	if (VolumeText == nullptr)
+	{
+		UE_LOG(LogSY, Warning, TEXT("VolumeText is nullptr"));
+		return;
+	}
+	VolumeText->SetText(FText::FromString(FString::FromInt((int32)(Value * 100.0f))));
 }
 
 void UACPlayerVoiceControlEntry::OnSliderCaptureEnd()
@@ -127,4 +162,30 @@ void UACPlayerVoiceControlEntry::OnSliderCaptureEnd()
 
 	// 슬라이더 조작이 끝나면 게임 인스턴스에 최종 볼륨 저장
 	GI->SetPlayerMicVolume(ItemData->PlayerState->GetPlayerName(), PlayerSlider->GetValue());
+}
+
+void UACPlayerVoiceControlEntry::OnMuteCheckBoxChanged(bool bIsChecked)
+{
+	AACCharacter* Character = Cast<AACCharacter>(ItemData->PlayerState->GetPawn());
+	if (Character == nullptr || Character->VOIPTalker == nullptr)
+	{
+		UE_LOG(LogSY, Warning, TEXT("Character or VOIPTalker is nullptr"));
+		return;
+	}
+	// VOIPTalker 음소거 설정
+	Character->VOIPTalker->MuteToggle(bIsChecked);
+
+	// 게임 인스턴스에 음소거 상태 저장
+	UACAdvancedFriendsGameInstance* GI = GetWorld()->GetGameInstance<UACAdvancedFriendsGameInstance>();
+	if (GI == nullptr)
+	{
+		UE_LOG(LogSY, Warning, TEXT("GameInstance is nullptr"));
+		return;
+	}
+	if (ItemData->PlayerState == nullptr)
+	{
+		UE_LOG(LogSY, Warning, TEXT("PlayerState is nullptr"));
+		return;
+	}
+	GI->SetPlayerMicMute(ItemData->PlayerState->GetPlayerName(), bIsChecked);
 }

@@ -457,6 +457,7 @@ void AACCharacter::TryRegisterVOIPTalker()
 		return;
 	}
 	VOIPTalker->SetVOIPVolume(GI->GetPlayerMicVolume(PS->GetPlayerName()));
+	VOIPTalker->MuteToggle(GI->GetPlayerMicMute(PS->GetPlayerName()));
 }
 
 void AACCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const

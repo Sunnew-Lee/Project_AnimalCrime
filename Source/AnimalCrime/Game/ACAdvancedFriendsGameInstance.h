@@ -114,6 +114,10 @@ public:
 	void SetPlayerMicVolume(const FString& PlayerName, float Volume);
 	float GetPlayerMicVolume(const FString& PlayerName) const;
 
+	// 플레이어별 음소거 설정 및 조회 함수
+	void SetPlayerMicMute(const FString& PlayerName, bool bIsMute);
+	bool GetPlayerMicMute(const FString& PlayerName) const;
+
 #pragma region Map Level 관련 맴버 변수 
 private:
 	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = true))
@@ -161,5 +165,8 @@ private:
 	UPROPERTY()
 	TMap<FString, float> PlayerMicVolumeMap;
 
+	// 플레이어 UniqueNetId 기준으로 음소거 여부 저장
+	UPROPERTY()
+	TMap<FString, bool> PlayerMicMuteMap;
 };
 

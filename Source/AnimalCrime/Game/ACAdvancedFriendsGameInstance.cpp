@@ -349,3 +349,17 @@ float UACAdvancedFriendsGameInstance::GetPlayerMicVolume(const FString& PlayerNa
 	}
 	return 0.5f; // 기본값
 }
+
+void UACAdvancedFriendsGameInstance::SetPlayerMicMute(const FString& PlayerName, bool bIsMute)
+{
+	PlayerMicMuteMap.Add(PlayerName, bIsMute);
+}
+
+bool UACAdvancedFriendsGameInstance::GetPlayerMicMute(const FString& PlayerName) const
+{
+	if (const bool* bIsMute = PlayerMicMuteMap.Find(PlayerName))
+	{
+		return *bIsMute;
+	}
+	return false; // 기본값
+}
