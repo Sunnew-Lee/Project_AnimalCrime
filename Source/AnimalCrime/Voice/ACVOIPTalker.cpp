@@ -16,7 +16,7 @@ void UACVOIPTalker::OnTalkingBegin(UAudioComponent* AudioComponent)
 
 void UACVOIPTalker::SetVOIPVolume(float NewVolumeMultiplier)
 {
-	VolumeMultiplier = NewVolumeMultiplier;
+	VolumeMultiplier = NewVolumeMultiplier * 6.0f; //기본 소리가 작아 6.0f 곱하기
 	if (CachedAudioComponent == nullptr)
 	{
 		return;

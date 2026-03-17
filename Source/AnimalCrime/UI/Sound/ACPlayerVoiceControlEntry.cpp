@@ -9,6 +9,8 @@
 #include "Game/ACPlayerState.h"
 #include "Engine/World.h"
 #include "ACPlayerVoiceControlEntryData.h"
+#include "Character/ACCharacter.h"
+#include "Voice/ACVOIPTalker.h"
 #include "AnimalCrime.h"
 
 void UACPlayerVoiceControlEntry::NativeOnListItemObjectSet(UObject* ListItemObject)
@@ -92,8 +94,14 @@ void UACPlayerVoiceControlEntry::UpdatePlayer(AACPlayerState* InPlayerState)
 
 void UACPlayerVoiceControlEntry::OnSliderValueChanged(float Value)
 {
-	//// 실시간 볼륨 적용
-	//ApplyVoiceVolume(Value);
+	AACCharacter* Character = Cast<AACCharacter>(ItemData->PlayerState->GetPawn());
+	if(Character == nullptr)
+	{
+		UE_LOG(LogSY, Warning, TEXT("Character is nullptr"));
+		return;
+	}
+
+	Character->VOIPTalker->SetVOIPVolume(Value);
 }
 
 void UACPlayerVoiceControlEntry::OnSliderCaptureEnd()

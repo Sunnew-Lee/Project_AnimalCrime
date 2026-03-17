@@ -131,7 +131,7 @@ void AACPlayerControllerBase::BeginPlay()
 	// SteamFriendList 생성
 	SoundSettingWidget = CreateWidget<UACSoundSetting>(this, SoundSettingWidgetClass);
 	SoundSettingWidget->SetVisibility(ESlateVisibility::Hidden);
-	SoundSettingWidget->AddToViewport();
+	SoundSettingWidget->AddToViewport(1000);
 }
 
 void AACPlayerControllerBase::SetupInputComponent()

@@ -448,6 +448,15 @@ void AACCharacter::TryRegisterVOIPTalker()
 	VOIPTalker->RegisterWithPlayerState(PS);
 
 	AC_LOG(LogVT, Log, TEXT("VOIPTalker registered for %s, Attenuation: %s"), *GetName(), VOIPTalker->Settings.AttenuationSettings ? TEXT("Enabled") : TEXT("Disabled"));
+	
+	// VOIPTalker 설정 로드 (볼륨 크기)
+	UACAdvancedFriendsGameInstance* GI = GetGameInstance<UACAdvancedFriendsGameInstance>();
+	if (GI == nullptr)
+	{
+		UE_LOG(LogSY, Warning, TEXT("GameInstance is nullptr"));
+		return;
+	}
+	VOIPTalker->SetVOIPVolume(GI->GetPlayerMicVolume(PS->GetPlayerName()));
 }
 
 void AACCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
