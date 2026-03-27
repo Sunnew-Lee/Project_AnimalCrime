@@ -55,123 +55,126 @@ void UACSoundSetting::InitInputDeviceComboBox()
 	InputDeviceComboBox->ClearOptions();
 	CachedInputDevices.Empty();
 
-#if PLATFORM_WINDOWS
-	// Windows 오디오 디바이스 열거
-	IMMDeviceEnumerator* pEnumerator = nullptr;
-	IMMDeviceCollection* pCollection = nullptr;
-
-	CoInitialize(nullptr);
-	HRESULT hr = CoCreateInstance(
-		__uuidof(MMDeviceEnumerator),
-		nullptr,
-		CLSCTX_ALL,
-		__uuidof(IMMDeviceEnumerator),
-		(void**)&pEnumerator
-	);
-
-	if (SUCCEEDED(hr))
-	{
-		hr = pEnumerator->EnumAudioEndpoints(eCapture, DEVICE_STATE_ACTIVE, &pCollection);
-
-		if (SUCCEEDED(hr))
-		{
-			UINT count;
-			pCollection->GetCount(&count);
-
-			UE_LOG(LogSY, Log, TEXT("[SoundSetting] Found %d input devices"), count);
-
-			for (UINT i = 0; i < count; i++)
-			{
-				IMMDevice* pDevice = nullptr;
-				hr = pCollection->Item(i, &pDevice);
-
-				if (SUCCEEDED(hr))
-				{
-					// 디바이스 ID 가져오기
-					LPWSTR pwszID = nullptr;
-					pDevice->GetId(&pwszID);
-					FString DeviceId(pwszID);
-					CoTaskMemFree(pwszID);
-
-					// 디바이스 이름 가져오기
-					IPropertyStore* pProps = nullptr;
-					pDevice->OpenPropertyStore(STGM_READ, &pProps);
-
-					PROPVARIANT varName;
-					PropVariantInit(&varName);
-					pProps->GetValue(PKEY_Device_FriendlyName, &varName);
-					FString DeviceName(varName.pwszVal);
-					PropVariantClear(&varName);
-
-					// 기본 디바이스 확인
-					IMMDevice* pDefaultDevice = nullptr;
-					bool bIsDefault = false;
-					if (SUCCEEDED(pEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &pDefaultDevice)))
-					{
-						LPWSTR pwszDefaultID = nullptr;
-						pDefaultDevice->GetId(&pwszDefaultID);
-						bIsDefault = (DeviceId == FString(pwszDefaultID));
-						CoTaskMemFree(pwszDefaultID);
-						pDefaultDevice->Release();
-					}
-
-					// 캐시에 추가
-					FInputDeviceInfo DeviceInfo;
-					DeviceInfo.DeviceId = DeviceId;
-					DeviceInfo.DeviceName = DeviceName;
-					DeviceInfo.bIsDefault = bIsDefault;
-					CachedInputDevices.Add(DeviceInfo);
-
-					InputDeviceComboBox->AddOption(DeviceName);
-
-					UE_LOG(LogSY, Log, TEXT("[SoundSetting] Input Device: %s (Default: %s)"),
-						*DeviceName, bIsDefault ? TEXT("Yes") : TEXT("No"));
-
-					pProps->Release();
-					pDevice->Release();
-				}
-			}
-
-			pCollection->Release();
-		}
-
-		pEnumerator->Release();
-	}
-
-	CoUninitialize();
-
-	// 저장된 디바이스 선택
-	UACAdvancedFriendsGameInstance* GI = GetWorld()->GetGameInstance<UACAdvancedFriendsGameInstance>();
-	if (GI && !GI->SelectedAudioInputDeviceId.IsEmpty())
-	{
-		for (int32 i = 0; i < CachedInputDevices.Num(); i++)
-		{
-			if (CachedInputDevices[i].DeviceId == GI->SelectedAudioInputDeviceId)
-			{
-				InputDeviceComboBox->SetSelectedIndex(i);
-				break;
-			}
-		}
-	}
-
-	// 선택된 게 없으면 기본 디바이스 선택
-	if (InputDeviceComboBox->GetSelectedIndex() == INDEX_NONE)
-	{
-		for (int32 i = 0; i < CachedInputDevices.Num(); i++)
-		{
-			if (CachedInputDevices[i].bIsDefault)
-			{
-				InputDeviceComboBox->SetSelectedIndex(i);
-				break;
-			}
-		}
-	}
-
-#else
+	// Windows 정책으로 인게임 내에서 기본 입력 장치 변경 불가능
+	// Windows WASAPI를 이용해 매 번 입력 장치를 직접 캡처 스트림을 열어 받아오는 방법이 있으나 불안정 요소가 많아 보임
+	// 그래서 기본 입력 장치만 보이게 하고, 사용자가 직접 시스템 설정에서 변경하도록 함.
+//#if PLATFORM_WINDOWS
+//	// Windows 오디오 디바이스 열거
+//	IMMDeviceEnumerator* pEnumerator = nullptr;
+//	IMMDeviceCollection* pCollection = nullptr;
+//
+//	CoInitialize(nullptr);
+//	HRESULT hr = CoCreateInstance(
+//		__uuidof(MMDeviceEnumerator),
+//		nullptr,
+//		CLSCTX_ALL,
+//		__uuidof(IMMDeviceEnumerator),
+//		(void**)&pEnumerator
+//	);
+//
+//	if (SUCCEEDED(hr))
+//	{
+//		hr = pEnumerator->EnumAudioEndpoints(eCapture, DEVICE_STATE_ACTIVE, &pCollection);
+//
+//		if (SUCCEEDED(hr))
+//		{
+//			UINT count;
+//			pCollection->GetCount(&count);
+//
+//			UE_LOG(LogSY, Log, TEXT("[SoundSetting] Found %d input devices"), count);
+//
+//			for (UINT i = 0; i < count; i++)
+//			{
+//				IMMDevice* pDevice = nullptr;
+//				hr = pCollection->Item(i, &pDevice);
+//
+//				if (SUCCEEDED(hr))
+//				{
+//					// 디바이스 ID 가져오기
+//					LPWSTR pwszID = nullptr;
+//					pDevice->GetId(&pwszID);
+//					FString DeviceId(pwszID);
+//					CoTaskMemFree(pwszID);
+//
+//					// 디바이스 이름 가져오기
+//					IPropertyStore* pProps = nullptr;
+//					pDevice->OpenPropertyStore(STGM_READ, &pProps);
+//
+//					PROPVARIANT varName;
+//					PropVariantInit(&varName);
+//					pProps->GetValue(PKEY_Device_FriendlyName, &varName);
+//					FString DeviceName(varName.pwszVal);
+//					PropVariantClear(&varName);
+//
+//					// 기본 디바이스 확인
+//					IMMDevice* pDefaultDevice = nullptr;
+//					bool bIsDefault = false;
+//					if (SUCCEEDED(pEnumerator->GetDefaultAudioEndpoint(eCapture, eConsole, &pDefaultDevice)))
+//					{
+//						LPWSTR pwszDefaultID = nullptr;
+//						pDefaultDevice->GetId(&pwszDefaultID);
+//						bIsDefault = (DeviceId == FString(pwszDefaultID));
+//						CoTaskMemFree(pwszDefaultID);
+//						pDefaultDevice->Release();
+//					}
+//
+//					// 캐시에 추가
+//					FInputDeviceInfo DeviceInfo;
+//					DeviceInfo.DeviceId = DeviceId;
+//					DeviceInfo.DeviceName = DeviceName;
+//					DeviceInfo.bIsDefault = bIsDefault;
+//					CachedInputDevices.Add(DeviceInfo);
+//
+//					InputDeviceComboBox->AddOption(DeviceName);
+//
+//					UE_LOG(LogSY, Log, TEXT("[SoundSetting] Input Device: %s (Default: %s)"),
+//						*DeviceName, bIsDefault ? TEXT("Yes") : TEXT("No"));
+//
+//					pProps->Release();
+//					pDevice->Release();
+//				}
+//			}
+//
+//			pCollection->Release();
+//		}
+//
+//		pEnumerator->Release();
+//	}
+//
+//	CoUninitialize();
+//
+//	// 저장된 디바이스 선택
+//	UACAdvancedFriendsGameInstance* GI = GetWorld()->GetGameInstance<UACAdvancedFriendsGameInstance>();
+//	if (GI && !GI->SelectedAudioInputDeviceId.IsEmpty())
+//	{
+//		for (int32 i = 0; i < CachedInputDevices.Num(); i++)
+//		{
+//			if (CachedInputDevices[i].DeviceId == GI->SelectedAudioInputDeviceId)
+//			{
+//				InputDeviceComboBox->SetSelectedIndex(i);
+//				break;
+//			}
+//		}
+//	}
+//
+//	// 선택된 게 없으면 기본 디바이스 선택
+//	if (InputDeviceComboBox->GetSelectedIndex() == INDEX_NONE)
+//	{
+//		for (int32 i = 0; i < CachedInputDevices.Num(); i++)
+//		{
+//			if (CachedInputDevices[i].bIsDefault)
+//			{
+//				InputDeviceComboBox->SetSelectedIndex(i);
+//				break;
+//			}
+//		}
+//	}
+//
+//#else
 	// 다른 플랫폼
 	InputDeviceComboBox->AddOption(TEXT("Use System Default Microphone"));
 	InputDeviceComboBox->SetSelectedIndex(0);
-#endif
+//#endif
 
 	UE_LOG(LogSY, Log, TEXT("입력 디바이스 초기화 완료"));
 
@@ -221,7 +224,7 @@ void UACSoundSetting::UpdatePlayerVoiceList()
 		}
 
 		AACPlayerState* PS = Cast<AACPlayerState>(PlayerState);
-		if(PS == nullptr)
+		if (PS == nullptr)
 		{
 			continue;
 		}
@@ -244,7 +247,7 @@ void UACSoundSetting::OnInputDeviceChanged(FString SelectedItem, ESelectInfo::Ty
 	UE_LOG(LogSY, Log, TEXT("[SoundSetting] Input device selection changed: %s"), *SelectedItem);
 
 	int32 SelectedIndex = InputDeviceComboBox->GetSelectedIndex();
-	if (CachedInputDevices.IsValidIndex(SelectedIndex))
+	if (CachedInputDevices.IsValidIndex(SelectedIndex) == true)
 	{
 		const FInputDeviceInfo& Device = CachedInputDevices[SelectedIndex];
 
@@ -263,10 +266,9 @@ void UACSoundSetting::OnInputDeviceChanged(FString SelectedItem, ESelectInfo::Ty
 		}
 
 		// 스팀 보이스챗에 디바이스 ID 전달
-		// 스팀 API에서 지원하는 경우에만 작동
-		// 대부분의 경우 스팀은 시스템 기본 마이크를 사용하므로
-		// Windows 설정에서 기본 마이크를 변경해야 할 수 있습니다
+		// 스팀 API에서 입력 장치 변경 지원을 하지 않아 기본 마이크만 사용 가능하게 됨.
 	}
+
 }
 
 void UACSoundSetting::OnOutputDevicesObtained(const TArray<FAudioOutputDeviceInfo>& Devices)
