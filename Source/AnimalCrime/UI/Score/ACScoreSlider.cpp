@@ -20,30 +20,52 @@ void UACScoreSlider::UpdateScore(float CurrentScore, float MaxScore)
 	}
 
 	TSharedPtr<SSlider> SlateSlider = StaticCastSharedPtr<SSlider>(ScoreSlider->GetCachedWidget());
-	if (bIsHappy == true && Percent <= 0.3)
+
+	EScoreState NewState;
+
+	if (Percent <= 0.3f)
 	{
-		bIsHappy = false;
-		FSlateBrush Brush;
-		Brush.SetResourceObject(CryingImage);
-		Brush.ImageSize = HandleImageSize;
-		SliderStyle.SetNormalThumbImage(Brush);
-		SliderStyle.SetBarThickness(15.f);
-		ScoreSlider->SetSliderBarColor(FLinearColor(1.0f, 0.6f, 0.6f));
-		if (SlateSlider.IsValid() == true)
-		{
-			SlateSlider->SetStyle(&SliderStyle);
-		}
+		NewState = EScoreState::Sad;
 	}
-	else if (bIsHappy == false && Percent > 0.3)
+	else if (Percent <= 0.7f)
 	{
-		bIsHappy = true;
+		NewState = EScoreState::Normal;
+	}
+	else
+	{
+		NewState = EScoreState::Happy;
+	}
+
+	// 상태가 바뀔 때만 UI 변경
+	if (NewState != CurrentState)
+	{
+		CurrentState = NewState;
+
 		FSlateBrush Brush;
-		Brush.SetResourceObject(SmileImage);
+
+		switch (CurrentState)
+		{
+		case EScoreState::Sad:
+			Brush.SetResourceObject(CryingImage);
+			ScoreSlider->SetSliderBarColor(FLinearColor(1.0f, 0.6f, 0.6f));
+			break;
+
+		case EScoreState::Normal:
+			Brush.SetResourceObject(NormalImage);
+			ScoreSlider->SetSliderBarColor(FLinearColor(1.0f, 1.0f, 0.4f));
+			break;
+
+		case EScoreState::Happy:
+			Brush.SetResourceObject(SmileImage);
+			ScoreSlider->SetSliderBarColor(FLinearColor(0.2f, 1.0f, 0.2f));
+			break;
+		}
+
 		Brush.ImageSize = HandleImageSize;
 		SliderStyle.SetNormalThumbImage(Brush);
 		SliderStyle.SetBarThickness(15.f);
-		ScoreSlider->SetSliderBarColor(FLinearColor(0.2f, 1.0f, 0.2f));
-		if (SlateSlider.IsValid() == true)
+
+		if (SlateSlider.IsValid())
 		{
 			SlateSlider->SetStyle(&SliderStyle);
 		}
