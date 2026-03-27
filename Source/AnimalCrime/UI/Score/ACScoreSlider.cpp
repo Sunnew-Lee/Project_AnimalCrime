@@ -28,6 +28,7 @@ void UACScoreSlider::UpdateScore(float CurrentScore, float MaxScore)
 		Brush.ImageSize = HandleImageSize;
 		SliderStyle.SetNormalThumbImage(Brush);
 		SliderStyle.SetBarThickness(15.f);
+		ScoreSlider->SetSliderBarColor(FLinearColor(1.0f, 0.6f, 0.6f));
 		if (SlateSlider.IsValid() == true)
 		{
 			SlateSlider->SetStyle(&SliderStyle);
@@ -41,6 +42,7 @@ void UACScoreSlider::UpdateScore(float CurrentScore, float MaxScore)
 		Brush.ImageSize = HandleImageSize;
 		SliderStyle.SetNormalThumbImage(Brush);
 		SliderStyle.SetBarThickness(15.f);
+		ScoreSlider->SetSliderBarColor(FLinearColor(0.2f, 1.0f, 0.2f));
 		if (SlateSlider.IsValid() == true)
 		{
 			SlateSlider->SetStyle(&SliderStyle);
