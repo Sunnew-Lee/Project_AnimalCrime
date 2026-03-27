@@ -161,7 +161,7 @@ void AACMainPlayerController::BeginPlay()
 	Super::BeginPlay();
 
 	//ConsoleCommand(TEXT("show Collision"));
-	ConsoleCommand(TEXT("Stat FPS"));
+	//ConsoleCommand(TEXT("Stat FPS"));
 	UE_LOG(LogTemp, Warning, TEXT("AACMainPlayerController BeginPlay"));
 
 	FInputModeGameOnly GameOnlyInputMode;

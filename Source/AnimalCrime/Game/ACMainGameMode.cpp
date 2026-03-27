@@ -431,10 +431,12 @@ void AACMainGameMode::SpawnAllAI()
 		Location.Z += Capsule->GetScaledCapsuleHalfHeight();
 		Transform.SetLocation(Location);
 		NewAI->FinishSpawning(Transform);
+#if WITH_EDITOR
 		if (IsValid(NewAI) == false)
 		{
 			DrawDebugCapsule(GetWorld(), Transform.GetLocation(), Capsule->GetScaledCapsuleHalfHeight(), Capsule->GetScaledCapsuleRadius(), Transform.GetRotation(), FColor::Red, false, 200.0f);
 		}
+#endif
 	}
 }
 

@@ -469,7 +469,9 @@ void AACMafiaCharacter::AttackHitCheck(int32 DamageAmount)
 	bool bHit = GetWorld()->SweepSingleByObjectType(Hit, Start, End, FQuat::Identity, ObjectParams, FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight), Params);
 
 	// 디버그: 캡슐 그리기
+#if WITH_EDITOR
 	DrawDebugCapsule(GetWorld(), (Start + End) * 0.5f, CapsuleHalfHeight, CapsuleRadius, FRotationMatrix::MakeFromZ(End - Start).ToQuat(), bHit ? FColor::Red : FColor::Green, false, 1.0f);
+#endif
 
 	if (bHit)
 	{
@@ -580,7 +582,7 @@ void AACMafiaCharacter::OnRep_HasWalkyTalky()
 
 void AACMafiaCharacter::ExcuteEscape()
 {
-	
+
 	if (EscapeCount <= 0)
 	{
 		return;
@@ -602,6 +604,6 @@ void AACMafiaCharacter::PerformEscape()
 	{
 		return;
 	}
-	
+
 	MulticastPlayEscapeSkillMontage();
 }
