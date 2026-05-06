@@ -52,7 +52,7 @@
       <td align="center"> <code> Windows </code> <code> Steam </code> </td>
       <td align="center"> <code> 캐주얼 숨바꼭질 </code> </td>
       <td align="center"> <code> Unreal </code> <code> C++ </code> </td>
-      <td align="center"> <a href=""> <code> YouTube </code> </a> </td>
+      <td align="center"> <a href="https://youtu.be/b3O8e9wADWg"> <code> YouTube </code> </a> </td>
     </tr>
   </table>
 </div>
