@@ -151,14 +151,14 @@ void UACMoneyComponent::InitMafiaSetting()
 {
 	MoneyData.MoneyType = EMoneyType::MoneyMafiaType;
 	
-	InitMoney(100);
+	InitMoney(500);
 }
 
 void UACMoneyComponent::InitPoliceSetting()
 {
 	MoneyData.MoneyType = EMoneyType::MoneyPoliceType;
 	
-	InitMoney(200);
+	InitMoney(800);
 }
 
 void UACMoneyComponent::InitCitizenSetting()

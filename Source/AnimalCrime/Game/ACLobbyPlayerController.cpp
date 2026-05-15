@@ -55,7 +55,7 @@ void AACLobbyPlayerController::SteamFriendListToggle(bool bVisible)
 	if (bVisible == true)
 	{
 		AC_LOG(LogSY, Log, TEXT("open"));
-		SteamFriendList->AddToViewport();
+		SteamFriendList->AddToViewport(1000);
 
 		// 마우스 커서 켜기
 		bShowMouseCursor = true;
@@ -131,17 +131,17 @@ void AACLobbyPlayerController::BeginPlay()
 	{
 		return;
 	}
-	LobbyScreen->AddToViewport();
+	LobbyScreen->AddToViewport(500);
 
-	// 마우스 커서 숨김
-	bShowMouseCursor = false;
+	//// 마우스 커서 숨김
+	//bShowMouseCursor = false;
 
-	// 클릭 끔
-	bEnableClickEvents = false;
-	bEnableMouseOverEvents = false;
+	//// 클릭 끔
+	//bEnableClickEvents = false;
+	//bEnableMouseOverEvents = false;
 
-	// 게임 입력만 받기
-	SetInputMode(FInputModeGameOnly());
+	//// 게임 입력만 받기
+	//SetInputMode(FInputModeGameOnly());
 
 	// SteamFriendList 생성
 	SteamFriendList = CreateWidget<UUserWidget>(this, SteamFriendListClass);

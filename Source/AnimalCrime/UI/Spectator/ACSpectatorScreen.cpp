@@ -63,7 +63,16 @@ void UACSpectatorScreen::SetFriend(AACPlayerState* PS)
 	{
 		return;
 	}
-	FriendNameText->SetText(FText::FromString(PS->GetPlayerName()));
+
+	//플레이어 이름 12자까지만 표기
+	FString PlayerName = PS->GetPlayerName();
+
+	if (PlayerName.Len() > 12)
+	{
+		PlayerName = PlayerName.Left(12) + TEXT("...");
+	}
+
+	FriendNameText->SetText(FText::FromString(PlayerName));
 
 	// Steam 아바타 가져오기
 	FBPUniqueNetId UniqueNetId;

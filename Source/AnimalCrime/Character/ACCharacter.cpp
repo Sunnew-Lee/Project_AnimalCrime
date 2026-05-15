@@ -41,6 +41,7 @@
 #include "Objects/MoneyData.h"
 
 #include "Game/ACPlayerState.h"
+#include "Game/ACPlayerControllerBase.h"
 #include "Game/ACAdvancedFriendsGameInstance.h"
 #include "Skill/ACSkillData.h"
 #include "Voice/ACVOIPTalker.h"
@@ -447,6 +448,16 @@ void AACCharacter::TryRegisterVOIPTalker()
 	VOIPTalker->RegisterWithPlayerState(PS);
 
 	AC_LOG(LogVT, Log, TEXT("VOIPTalker registered for %s, Attenuation: %s"), *GetName(), VOIPTalker->Settings.AttenuationSettings ? TEXT("Enabled") : TEXT("Disabled"));
+	
+	// VOIPTalker 설정 로드 (볼륨 크기)
+	UACAdvancedFriendsGameInstance* GI = GetGameInstance<UACAdvancedFriendsGameInstance>();
+	if (GI == nullptr)
+	{
+		UE_LOG(LogSY, Warning, TEXT("GameInstance is nullptr"));
+		return;
+	}
+	VOIPTalker->SetVOIPVolume(GI->GetPlayerMicVolume(PS->GetPlayerName()));
+	VOIPTalker->MuteToggle(GI->GetPlayerMicMute(PS->GetPlayerName()));
 }
 
 void AACCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
@@ -709,8 +720,35 @@ void AACCharacter::SettingsClose()
 		break;
 	case ESettingMode::Default:
 		break;
+	case ESettingMode::SoundSetting:
+		SetSoundSetting();
+		break;
 	default:
 		break;
+	}
+}
+
+void AACCharacter::SetSoundSetting()
+{
+
+	AACPlayerControllerBase* PC = Cast<AACPlayerControllerBase>(GetController());
+	if (PC == nullptr)
+	{
+		return;
+	}
+
+	//설정창이 꺼져있으면 소리 설정창 오픈, 소리 설정창이 켜져있으면 끄기, 다른 설정창이면 아무것도 안함.
+	if (SettingMode == ESettingMode::None)
+	{
+		PC->SoundSettingToggle(true);
+		ChangeInputMode(EInputMode::Settings);
+		SettingMode = ESettingMode::SoundSetting;
+	}
+	else if (SettingMode == ESettingMode::SoundSetting)
+	{
+		PC->SoundSettingToggle(false);
+		ChangeInputMode(EInputMode::Sholder);
+		SettingMode = ESettingMode::None;
 	}
 }
 

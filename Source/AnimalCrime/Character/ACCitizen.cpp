@@ -651,8 +651,11 @@ void AACCitizen::AttackHitCheck()
 	
 	bool bHit = GetWorld()->SweepSingleByObjectType(Hit, Start, End, FQuat::Identity, ObjectParams, FCollisionShape::MakeCapsule(CapsuleRadius, CapsuleHalfHeight), Params);
 	// 디버그: 캡슐 그리기
+
+#if WITH_EDITOR
 	DrawDebugCapsule(GetWorld(), (Start + End) * 0.5f, CapsuleHalfHeight, CapsuleRadius, FRotationMatrix::MakeFromZ(End - Start).ToQuat(), bHit ? FColor::Red : FColor::Green, false, 1.0f);
-	
+#endif
+
 	if (bHit)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Hit Actor: %s"), *Hit.GetActor()->GetName());
@@ -742,7 +745,9 @@ bool AACCitizen::DetectPolice()
 		PoliceCharacter = nullptr;
 	}
 	
+#if WITH_EDITOR
 	DrawDebugSphere(GetWorld(), Origin, CircleRadius, 16, bFound ? FColor::Red : FColor::Green, false, 1.0f);
+#endif
 
 	return bFound;
 }

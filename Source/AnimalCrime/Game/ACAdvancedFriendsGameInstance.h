@@ -85,17 +85,38 @@ private:
 	void DoServerTravel();
 
 public:
- /**
-     @brief 맵 이동 중 대채 화면 표시
- **/
+	/**
+		@brief 맵 이동 중 대채 화면 표시
+	**/
 	UFUNCTION(BlueprintCallable)
 	void ShowTransitionScreen();
 
- /**
-	 @brief 대체 화면 숨기기
- **/
+	/**
+		@brief 대체 화면 숨기기
+	**/
 	UFUNCTION(BlueprintCallable)
 	void HideTransitionScreen();
+
+public:
+	/**
+		@brief 오디오 설정을 저장된 값으로 적용
+	**/
+	UFUNCTION()
+	void ApplySavedAudioSettings();
+
+private:
+	// 델리게이트 콜백 함수 (UFUNCTION으로 선언)
+	UFUNCTION()
+	void OnAudioOutputDeviceSwapCompleted(const FSwapAudioOutputResult& SwapResult);
+
+public:
+	// 플레이어별 마이크 볼륨 설정 및 조회 함수
+	void SetPlayerMicVolume(const FString& PlayerName, float Volume);
+	float GetPlayerMicVolume(const FString& PlayerName) const;
+
+	// 플레이어별 음소거 설정 및 조회 함수
+	void SetPlayerMicMute(const FString& PlayerName, bool bIsMute);
+	bool GetPlayerMicMute(const FString& PlayerName) const;
 
 #pragma region Map Level 관련 맴버 변수 
 private:
@@ -125,5 +146,27 @@ protected:
 public:
 	UPROPERTY()
 	TObjectPtr<class UACFadeInScreen> TransitionScreen;
+
+	//===== Audio Device Settings =====
+public:
+	//!< 오디오 디바이스 ID
+	UPROPERTY()
+	FString SelectedAudioOutputDeviceId;
+
+	UPROPERTY()
+	FString SelectedAudioInputDeviceId;
+
+private:
+	// 재적용 타이머 (AudioDevice 초기화 대기)
+	FTimerHandle AudioSettingsTimerHandle;
+
+private:
+	// 플레이어 UniqueNetId 기준으로 볼륨 저장
+	UPROPERTY()
+	TMap<FString, float> PlayerMicVolumeMap;
+
+	// 플레이어 UniqueNetId 기준으로 음소거 여부 저장
+	UPROPERTY()
+	TMap<FString, bool> PlayerMicMuteMap;
 };
 

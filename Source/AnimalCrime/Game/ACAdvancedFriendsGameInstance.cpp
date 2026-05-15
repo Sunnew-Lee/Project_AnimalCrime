@@ -10,6 +10,14 @@
 #include "VoipListenerSynthComponent.h"
 #include "Blueprint/UserWidget.h"
 #include "UI/Common/ACFadeInScreen.h"
+#include "AudioMixerBlueprintLibrary.h"
+
+#if PLATFORM_WINDOWS
+#include "Windows/AllowWindowsPlatformTypes.h"
+#include <mmdeviceapi.h>
+#include <functiondiscoverykeys_devpkey.h>
+#include "Windows/HideWindowsPlatformTypes.h"
+#endif
 
 UACAdvancedFriendsGameInstance::UACAdvancedFriendsGameInstance(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer)
 {
@@ -275,4 +283,83 @@ void UACAdvancedFriendsGameInstance::HideTransitionScreen()
 	Viewport->RemoveViewportWidgetContent(WidgetSlate.ToSharedRef());
 
 	UE_LOG(LogSY, Log, TEXT("TransitionScreen removed from GameViewportClient"));
+}
+
+void UACAdvancedFriendsGameInstance::ApplySavedAudioSettings()
+{
+	// 1. 출력 디바이스 적용
+	if (SelectedAudioOutputDeviceId.IsEmpty() == false)
+	{
+		UE_LOG(LogSY, Log, TEXT("Applying saved audio output device: %s"), *SelectedAudioOutputDeviceId);
+
+		FOnCompletedDeviceSwap OnSwapCompleted;
+		OnSwapCompleted.BindUFunction(this, FName("OnAudioOutputDeviceSwapCompleted"));
+
+		UAudioMixerBlueprintLibrary::SwapAudioOutputDevice(
+			this,
+			SelectedAudioOutputDeviceId,
+			OnSwapCompleted
+		);
+	}
+	else
+	{
+		UE_LOG(LogSY, Log, TEXT("No saved audio output device"));
+	}
+
+#if PLATFORM_WINDOWS
+	// 2. 입력 디바이스 적용 (Windows만)
+	if (SelectedAudioInputDeviceId.IsEmpty() == true)
+	{
+		UE_LOG(LogSY, Log, TEXT("No saved audio input device"));
+		return;
+	}
+	else
+	{
+		UE_LOG(LogSY, Log, TEXT("Validating saved input device: %s"), *SelectedAudioInputDeviceId);
+	}
+
+	//스팀 API에서 입력 디바이스 변경을 지원하지 않는 것으로 보임. 추후 수점
+#endif
+}
+
+void UACAdvancedFriendsGameInstance::OnAudioOutputDeviceSwapCompleted(const FSwapAudioOutputResult& SwapResult)
+{
+	if (SwapResult.Result == ESwapAudioOutputDeviceResultState::Success)
+	{
+		UE_LOG(LogSY, Log, TEXT("[GameInstance] ✓ Audio output device applied successfully!"));
+	}
+	else
+	{
+		UE_LOG(LogSY, Warning, TEXT("[GameInstance] ✗ Failed to apply saved audio device"));
+		// 실패하면 저장된 ID 초기화
+		SelectedAudioOutputDeviceId.Empty();
+	}
+}
+
+void UACAdvancedFriendsGameInstance::SetPlayerMicVolume(const FString& PlayerName, float Volume)
+{
+	PlayerMicVolumeMap.Add(PlayerName, FMath::Clamp(Volume, 0.f, 1.f));
+}
+
+float UACAdvancedFriendsGameInstance::GetPlayerMicVolume(const FString& PlayerName) const
+{
+	if (const float* Volume = PlayerMicVolumeMap.Find(PlayerName))
+	{
+		return *Volume;
+	}
+	return 0.5f; // 기본값
+}
+
+void UACAdvancedFriendsGameInstance::SetPlayerMicMute(const FString& PlayerName, bool bIsMute)
+{
+	PlayerMicMuteMap.Add(PlayerName, bIsMute);
+}
+
+bool UACAdvancedFriendsGameInstance::GetPlayerMicMute(const FString& PlayerName) const
+{
+	if (const bool* bIsMute = PlayerMicMuteMap.Find(PlayerName))
+	{
+		return *bIsMute;
+	}
+	return false; // 기본값
 }
